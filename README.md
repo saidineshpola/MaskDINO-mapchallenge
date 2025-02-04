@@ -31,3 +31,6 @@ python train_net.py \
 
 ## Additional Usage
 For full usage and detailed instructions, refer to [Detectron2 Getting Started Guide](https://github.com/facebookresearch/detectron2/blob/master/GETTING_STARTED.md).
+
+## Related repositories
+- [mmdetection training experiments ](https://github.com/saidineshpola/mapchallenge-instance-segmentation/tree/main)
