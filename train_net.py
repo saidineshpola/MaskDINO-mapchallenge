@@ -2,14 +2,19 @@
 # Copyright (c) 2022 IDEA. All Rights Reserved.
 # Licensed under the Apache License, Version 2.0 [see LICENSE for details]
 # by Feng Li and Hao Zhang.
+# Updated by: Saidinesh Pola
 # ------------------------------------------------------------------------
 """
 MaskDINO Training Script based on Mask2Former.
 """
+import warnings
+
+warnings.filterwarnings("ignore", category=FutureWarning)
 try:
     from shapely.errors import ShapelyDeprecationWarning
     import warnings
-    warnings.filterwarnings('ignore', category=ShapelyDeprecationWarning)
+
+    warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
 except:
     pass
 
@@ -61,15 +66,80 @@ from detectron2.engine import (
     launch,
     create_ddp_model,
     AMPTrainer,
-    SimpleTrainer
+    SimpleTrainer,
 )
 import weakref
+import os
+import json
+from detectron2.data import DatasetCatalog, MetadataCatalog
+from detectron2.structures import BoxMode
+from pycocotools import mask as maskUtils
+
+
+def get_building_dicts(root_dir):
+    img_dir, ann_dir = os.path.join(root_dir, "images"), os.path.join(
+        root_dir, "annotations"
+    )
+    json_file = os.path.join(ann_dir, "annotation.json")
+    with open(json_file) as f:
+        imgs_anns = json.load(f)
+
+    dataset_dicts = []
+    for idx, v in enumerate(imgs_anns["images"]):
+        record = {}
+
+        filename = os.path.join(img_dir, v["file_name"])
+        height, width = v["height"], v["width"]
+
+        record["file_name"] = filename
+        record["image_id"] = v["id"]
+        record["height"] = height
+        record["width"] = width
+
+        annos = [
+            anno for anno in imgs_anns["annotations"] if anno["image_id"] == v["id"]
+        ]
+        objs = []
+        for anno in annos:
+            segm = anno["segmentation"]
+            rle = maskUtils.frPyObjects(segm, height, width)
+            bbox = maskUtils.toBbox(rle).flatten().tolist()
+            # assert (
+            #     len(bbox) == 4 or len(bbox) == 5
+            # ), f"AssertionError: BoxMode.convert takes either a k-tuple/list or an Nxk array/tensor, where k == 4 or 5, but got {len(bbox)}"
+            obj = {
+                "bbox": bbox,
+                "bbox_mode": BoxMode.XYWH_ABS,
+                "segmentation": segm,
+                "category_id": 0,  # anno["category_id"],
+            }
+            objs.append(obj)
+        record["annotations"] = objs
+        dataset_dicts.append(record)
+    return dataset_dicts
+
+
+for d in ["train", "val", "test"]:
+    root_dir = (
+        "/data1/max/instance_segmentation/mmdetection/MaskDINO/datasets/satellite_" + d
+    )
+    DatasetCatalog.register(
+        "satellite_" + d,
+        lambda d=d: get_building_dicts(root_dir),
+    )
+    # /data1/max/instance_segmentation/mmdetection/MaskDINO/datasets
+    dataset_name = "satellite_" + d
+    MetadataCatalog.get(dataset_name).set(
+        thing_classes=["building"], evaluator_type="coco"
+    )
+coco_metadata = MetadataCatalog.get("satellite_train")
 
 
 class Trainer(DefaultTrainer):
     """
     Extension of the Trainer class adapted to MaskFormer.
     """
+
     def __init__(self, cfg):
         super(DefaultTrainer, self).__init__()
         logger = logging.getLogger("detectron2")
@@ -91,7 +161,7 @@ class Trainer(DefaultTrainer):
 
         # add model EMA
         kwargs = {
-            'trainer': weakref.proxy(self),
+            "trainer": weakref.proxy(self),
         }
         # kwargs.update(model_ema.may_get_ema_checkpointer(cfg, model)) TODO: release ema training for large models
         self.checkpointer = DetectionCheckpointer(
@@ -147,17 +217,41 @@ class Trainer(DefaultTrainer):
             "mapillary_vistas_panoptic_seg",
         ]:
             if cfg.MODEL.MaskDINO.TEST.PANOPTIC_ON:
-                evaluator_list.append(COCOPanopticEvaluator(dataset_name, output_folder))
+                evaluator_list.append(
+                    COCOPanopticEvaluator(dataset_name, output_folder)
+                )
         # COCO
-        if evaluator_type == "coco_panoptic_seg" and cfg.MODEL.MaskDINO.TEST.INSTANCE_ON:
+        if (
+            evaluator_type == "coco_panoptic_seg"
+            and cfg.MODEL.MaskDINO.TEST.INSTANCE_ON
+        ):
             evaluator_list.append(COCOEvaluator(dataset_name, output_dir=output_folder))
-        if evaluator_type == "coco_panoptic_seg" and cfg.MODEL.MaskDINO.TEST.SEMANTIC_ON:
-            evaluator_list.append(SemSegEvaluator(dataset_name, distributed=True, output_dir=output_folder))
+        if (
+            evaluator_type == "coco_panoptic_seg"
+            and cfg.MODEL.MaskDINO.TEST.SEMANTIC_ON
+        ):
+            evaluator_list.append(
+                SemSegEvaluator(
+                    dataset_name, distributed=True, output_dir=output_folder
+                )
+            )
         # Mapillary Vistas
-        if evaluator_type == "mapillary_vistas_panoptic_seg" and cfg.MODEL.MaskDINO.TEST.INSTANCE_ON:
-            evaluator_list.append(InstanceSegEvaluator(dataset_name, output_dir=output_folder))
-        if evaluator_type == "mapillary_vistas_panoptic_seg" and cfg.MODEL.MaskDINO.TEST.SEMANTIC_ON:
-            evaluator_list.append(SemSegEvaluator(dataset_name, distributed=True, output_dir=output_folder))
+        if (
+            evaluator_type == "mapillary_vistas_panoptic_seg"
+            and cfg.MODEL.MaskDINO.TEST.INSTANCE_ON
+        ):
+            evaluator_list.append(
+                InstanceSegEvaluator(dataset_name, output_dir=output_folder)
+            )
+        if (
+            evaluator_type == "mapillary_vistas_panoptic_seg"
+            and cfg.MODEL.MaskDINO.TEST.SEMANTIC_ON
+        ):
+            evaluator_list.append(
+                SemSegEvaluator(
+                    dataset_name, distributed=True, output_dir=output_folder
+                )
+            )
         # Cityscapes
         if evaluator_type == "cityscapes_instance":
             assert (
@@ -181,8 +275,13 @@ class Trainer(DefaultTrainer):
                 ), "CityscapesEvaluator currently do not work with multiple machines."
                 evaluator_list.append(CityscapesInstanceEvaluator(dataset_name))
         # ADE20K
-        if evaluator_type == "ade20k_panoptic_seg" and cfg.MODEL.MaskDINO.TEST.INSTANCE_ON:
-            evaluator_list.append(InstanceSegEvaluator(dataset_name, output_dir=output_folder))
+        if (
+            evaluator_type == "ade20k_panoptic_seg"
+            and cfg.MODEL.MaskDINO.TEST.INSTANCE_ON
+        ):
+            evaluator_list.append(
+                InstanceSegEvaluator(dataset_name, output_dir=output_folder)
+            )
         # LVIS
         if evaluator_type == "lvis":
             return LVISEvaluator(dataset_name, output_dir=output_folder)
@@ -262,7 +361,9 @@ class Trainer(DefaultTrainer):
 
                 hyperparams = copy.copy(defaults)
                 if "backbone" in module_name:
-                    hyperparams["lr"] = hyperparams["lr"] * cfg.SOLVER.BACKBONE_MULTIPLIER
+                    hyperparams["lr"] = (
+                        hyperparams["lr"] * cfg.SOLVER.BACKBONE_MULTIPLIER
+                    )
                 if (
                     "relative_position_bias_table" in module_param_name
                     or "absolute_pos_embed" in module_param_name
@@ -286,7 +387,9 @@ class Trainer(DefaultTrainer):
 
             class FullModelGradientClippingOptimizer(optim):
                 def step(self, closure=None):
-                    all_params = itertools.chain(*[x["params"] for x in self.param_groups])
+                    all_params = itertools.chain(
+                        *[x["params"] for x in self.param_groups]
+                    )
                     torch.nn.utils.clip_grad_norm_(all_params, clip_norm_val)
                     super().step(closure=closure)
 
@@ -336,7 +439,9 @@ def setup(args):
     cfg.merge_from_list(args.opts)
     cfg.freeze()
     default_setup(cfg, args)
-    setup_logger(output=cfg.OUTPUT_DIR, distributed_rank=comm.get_rank(), name="maskdino")
+    setup_logger(
+        output=cfg.OUTPUT_DIR, distributed_rank=comm.get_rank(), name="maskdino"
+    )
     return cfg
 
 
@@ -349,9 +454,7 @@ def main(args):
             cfg.MODEL.WEIGHTS, resume=args.resume
         )
         checkpointer = DetectionCheckpointer(model, save_dir=cfg.OUTPUT_DIR)
-        checkpointer.resume_or_load(
-            cfg.MODEL.WEIGHTS, resume=args.resume
-        )
+        checkpointer.resume_or_load(cfg.MODEL.WEIGHTS, resume=args.resume)
         res = Trainer.test(cfg, model)
         if cfg.TEST.AUG.ENABLED:
             res.update(Trainer.test_with_TTA(cfg, model))
@@ -366,12 +469,12 @@ def main(args):
 
 if __name__ == "__main__":
     parser = default_argument_parser()
-    parser.add_argument('--eval_only', action='store_true')
-    parser.add_argument('--EVAL_FLAG', type=int, default=1)
+    parser.add_argument("--eval_only", action="store_true")
+    parser.add_argument("--EVAL_FLAG", type=int, default=1)
     args = parser.parse_args()
     # random port
     port = random.randint(1000, 20000)
-    args.dist_url = 'tcp://127.0.0.1:' + str(port)
+    args.dist_url = "tcp://127.0.0.1:" + str(port)
     print("Command Line Args:", args)
     print("pwd:", os.getcwd())
     launch(
