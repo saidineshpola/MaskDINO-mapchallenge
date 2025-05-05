@@ -31,7 +31,7 @@ python train_net.py \
 
 **Note:**
 - **mAP@50/mAR@50** refers to average precision/recall at 0.50 and **mAP@75/mAR@75** refers to average precision/recall at 0.75 IOU
-- `segm mAP` values are usually averaged over multiple IOUs from 0.5 to 0.95
+- `segm mAP` values are usually averaged over multiple IOUs from 0.5 to 0.95 with interval of 0.05
 - In metric columns,
        - `s` = small objects
        - `m` = medium objects
