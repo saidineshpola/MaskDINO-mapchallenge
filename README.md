@@ -19,7 +19,7 @@ python train_net.py \
 
 ## MapChallenge Instance Segmentation Results
 
-| Model            | segm mAP | segm mAP_50 | segm mAP_75 | segm mAP_s | segm mAP_m | segm mAP_l | segm mAR | segm mAR_50 | segm mAR_75 |
+| Model            | segm mAP | segm mAP@50 | segm mAP@75 | segm mAP_s | segm mAP_m | segm mAP_l | segm mAR | segm mAR@50 | segm mAR@75 |
 |------------------|----------|-------------|-------------|------------|------------|------------|---------|--------|------------|
 | SwinS-Mask2former| 0.3110   | 0.7160      | 0.2180      | 0.1690     | 0.4420     | 0.0990     | 0.42    | 0.833  | 0.362      |
 | SwinL-Mask2former| 0.3080   | 0.7260      | 0.2360      | 0.1710     | 0.4400     | 0.1310     | 0.453   | 0.855  | 0.464      |
@@ -29,6 +29,13 @@ python train_net.py \
 | QueryInst-r101   | 0.2780   | 0.6340      | 0.2000      | 0.1760     | 0.3910     | 0.1010     | 0.458   | 0.855  | 0.464      |
 | **MaskDINO**     | **0.561** | **0.911**    | **0.65**    | **0.351**   | **0.6843** | **0.6851** | **0.617** | **0.949** | **0.703**      |
 
+**Note:**
+- **mAP@50/mAR@50** refers to average precision/recall at 0.50 and **mAP@75/mAR@75** refers to average precision/recall at 0.75 IOU
+- `segm mAP` values are usually averaged over multiple IOUs from 0.5 to 0.95
+- In metric columns,
+       - `s` = small objects
+       - `m` = medium objects
+       - `l` = large objects
 ## Additional Usage
 For full usage and detailed instructions, refer to [Detectron2 Getting Started Guide](https://github.com/facebookresearch/detectron2/blob/master/GETTING_STARTED.md).
 
