@@ -22,6 +22,7 @@ python train_net.py \
      --eval-only \
      --num-gpus 2 \
      --config-file configs/coco/instance-segmentation/swin/maskdino_R50_bs16_50ep_4s_dowsample1_2048.yaml \
+     DATASETS.TEST '("satellite_test",)' \
      MODEL.WEIGHTS MODEL_CHECKPOINT_PATH
 ```
 
