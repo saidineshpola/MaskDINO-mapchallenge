@@ -119,19 +119,24 @@ def get_building_dicts(root_dir):
     return dataset_dicts
 
 
-for d in ["train", "val", "test"]:
-    root_dir = (
-        "/data1/max/instance_segmentation/mmdetection/MaskDINO/datasets/satellite_" + d
+
+## Prepare Data and Metadata catalogues
+for split in ["train", "val", "test"]:
+    root_dir = os.path.join(
+        "/scratch/mohanty/mapping-challenge-data/processed/final-corrected-v2",
+        split
     )
     DatasetCatalog.register(
-        "satellite_" + d,
-        lambda d=d: get_building_dicts(root_dir),
+        f"satellite_{split}",
+        lambda split=split: get_building_dicts(root_dir),
     )
     # /data1/max/instance_segmentation/mmdetection/MaskDINO/datasets
-    dataset_name = "satellite_" + d
+    dataset_name = f"satellite_{split}"
     MetadataCatalog.get(dataset_name).set(
         thing_classes=["building"], evaluator_type="coco"
     )
+    
+
 coco_metadata = MetadataCatalog.get("satellite_train")
 
 
