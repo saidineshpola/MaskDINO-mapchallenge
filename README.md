@@ -29,6 +29,12 @@ python train_net.py \
 <!--mask2former S 
 segm_mAP_copypaste: 0.340 0.659 0.325 0.116 0.480 0.533
 segm_mAR_copypaste: 0.478 0.825 0.494 0.285 0.595 0.762 
+
+rtmdet-m
+segm_mAP_copypaste: 0.346 0.643 0.330 0.133 0.482 0.501
+segm_mAR_copypaste: 0.474 0.831 0.459 0.279 0.595 0.712 
+
+rtmdet-X
  -->
 ## MapChallenge Instance Segmentation Results
 
