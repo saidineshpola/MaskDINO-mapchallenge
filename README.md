@@ -26,7 +26,9 @@ python train_net.py \
      MODEL.WEIGHTS MODEL_CHECKPOINT_PATH
 ```
 
-
+<!--mask2former S 
+coco/segm_mAP: 0.2590  coco/segm_mAP_50: 0.5650  coco/segm_mAP_75: 0.2120  coco/segm_mAP_s: 0.0770  coco/segm_mAP_m: 0.3780  coco/segm_mAP_l: 0.5180  data_time: 2.5279  time: 3.4822
+ -->
 ## MapChallenge Instance Segmentation Results
 
 | Model            | segm mAP | segm mAP@50 | segm mAP@75 | segm mAP_s | segm mAP_m | segm mAP_l | segm mAR | segm mAR@50 | segm mAR@75 |
