@@ -27,7 +27,8 @@ python train_net.py \
 ```
 
 <!--mask2former S 
-coco/segm_mAP: 0.2590  coco/segm_mAP_50: 0.5650  coco/segm_mAP_75: 0.2120  coco/segm_mAP_s: 0.0770  coco/segm_mAP_m: 0.3780  coco/segm_mAP_l: 0.5180  data_time: 2.5279  time: 3.4822
+segm_mAP_copypaste: 0.340 0.659 0.325 0.116 0.480 0.533
+segm_mAR_copypaste: 0.478 0.825 0.494 0.285 0.595 0.762 
  -->
 ## MapChallenge Instance Segmentation Results
 
