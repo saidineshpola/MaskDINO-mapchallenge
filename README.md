@@ -35,6 +35,8 @@ segm_mAP_copypaste: 0.346 0.643 0.330 0.133 0.482 0.501
 segm_mAR_copypaste: 0.474 0.831 0.459 0.279 0.595 0.712 
 
 rtmdet-X
+segm_mAP_copypaste: 0.418 0.743 0.472 0.194 0.536 0.769
+segm_mAR_copypaste: 0.529 0.897 0.586 0.358 0.617 0.867 
  -->
 ## MapChallenge Instance Segmentation Results
 
