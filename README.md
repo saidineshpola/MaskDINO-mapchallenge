@@ -31,8 +31,8 @@ segm_mAP_copypaste: 0.340 0.659 0.325 0.116 0.480 0.533
 segm_mAR_copypaste: 0.478 0.825 0.494 0.285 0.595 0.762 
 
 rtmdet-m
-segm_mAP_copypaste: 0.346 0.643 0.330 0.133 0.482 0.501
-segm_mAR_copypaste: 0.474 0.831 0.459 0.279 0.595 0.712 
+segm_mAP_copypaste: 0.403 0.726 0.452 0.186 0.523 0.737
+segm_mAR_copypaste: 0.527 0.888 0.586 0.351 0.622 0.817
 
 rtmdet-X
 segm_mAP_copypaste: 0.418 0.743 0.472 0.194 0.536 0.769
