@@ -27,8 +27,8 @@ python train_net.py \
 ```
 
 <!--mask2former S 
-segm_mAP_copypaste: 0.340 0.659 0.325 0.116 0.480 0.533
-segm_mAR_copypaste: 0.478 0.825 0.494 0.285 0.595 0.762 
+segm_mAP_copypaste: 0.380 0.721 0.382 0.152 0.495 0.692
+segm_mAR_copypaste:0.504 0.879 0.509 0.338 0.594 0.783 
 
 rtmdet-m
 segm_mAP_copypaste: 0.403 0.726 0.452 0.186 0.523 0.737
